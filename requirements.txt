@@ -1,0 +1,5 @@
+pandas==2.2.1
+torch==2.2.1
+scikit-learn==1.4.0
+metatreelib==0.1.0
+transformers==4.38.2

@@ -1,11 +1,10 @@
 from metatree.model_metatree import LlamaForMetaTree as MetaTree
-from metatree.decision_tree_class import DecisionTree, DecisionTreeForest
-from metatree.run_train import preprocess_dimension_patch
 from transformers import AutoConfig
-import imodels # pip install imodels 
+import pandas as pd 
+from sklearn.model_selection import train_test_split
 
 # Initialize Model
-model_name_or_path = "yzhuang/MetaTree"
+model_name_or_path = "metatree_model"
 
 config = AutoConfig.from_pretrained(model_name_or_path)
 model = MetaTree.from_pretrained(
@@ -13,15 +12,11 @@ model = MetaTree.from_pretrained(
     config=config,
 )   
 
-# Load Datasets
-X, y, feature_names = imodels.get_clean_dataset('fico', data_source='imodels')
+# Load Dataset
+data = pd.read_csv(r"dataset/train.csv")
+row, col = data.shape
+print("Dataset Shapes X={}, y={}".format(row, col))
 
-print("Dataset Shapes X={}, y={}, Num of Classes={}".format(X.shape, y.shape, len(set(y))))
-
-train_idx, test_idx = sklearn.model_selection.train_test_split(range(X.shape[0]), test_size=0.3, random_state=seed)
-
-# Dimension Subsampling
-feature_idx = np.random.choice(X.shape[1], 10, replace=False)
-X = X[:, feature_idx]
-
-test_X, test_y = X[test_idx], y[test_idx]
+X = data[data.loc[:, data.columns != 'URL'].columns]
+y = df['URL']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
