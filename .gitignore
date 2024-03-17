@@ -1,0 +1,21 @@
+__pycache__/
+
+# Jupyter Notebook
+*.ipynb
+.ipynb_checkpoints
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Pretrained Model Checkpoint
+MetaTree/*.safetensors
+
+# Dataset
+dataset/
+*.csv
