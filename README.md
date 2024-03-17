@@ -1,3 +1,33 @@
+# Structure
+
+.
+
+├── Dockerfile
+
+├── README.md
+
+├── dataset
+
+├── infer.py
+
+├── metatree_model
+
+│   ├── README.md
+
+│   ├── config.json
+
+│   └── generation_config.json
+
+├── model_initialize
+
+│   └── main.py
+
+├── requirements.txt
+
+└── train.py
+
+4 directories, 9 files
+
 # malicious-url-detection
 MIPT MLOps project. Focusing on malicious URL detection.
 
