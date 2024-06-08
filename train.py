@@ -1,19 +1,33 @@
-import random
-import torch
-from metatree.run_train import preprocess_dimension_patch
-from metatree.decision_tree_class import DecisionTree
+import logging
+import hydra
+import pytorch_lightning as pl
+import pandas as pd
 
-subset_idx = random.sample(train_idx, 256)
-train_X, train_y = X[subset_idx], y[subset_idx]
+from TLModelCode import data_module, data_prepare, lightning_model
 
-input_x = torch.tensor(train_X, dtype=torch.float32)
-input_y = torch.nn.functional.one_hot(torch.tensor(train_y)).float()
+from omegaconf import DictConfig, OmegaConf
 
-batch = {"input_x": input_x, "input_y": input_y, "input_y_clean": input_y}
-batch = preprocess_dimension_patch(batch, n_feature=10, n_class=10)
-model.depth = 2
-outputs = model.generate_decision_tree(batch['input_x'], batch['input_y'], depth=model.depth)
-decision_tree_forest.add_tree(DecisionTree(auto_dims=outputs.metatree_dimensions, auto_thresholds=outputs.tentative_splits, input_x=batch['input_x'], input_y=batch['input_y'], depth=model.depth))
 
-print("Decision Tree Features: ", [x.argmax(dim=-1) for x in outputs.metatree_dimensions])
-print("Decision Tree Threasholds: ", outputs.tentative_splits)
+@hydra.main(config_path="conf", config_name="train")
+def train(cfg: DictConfig) -> None:
+    logger = logging.getLogger(__name__)
+    logger.info(f"Training with the following config:\n{OmegaConf.to_yaml(cfg)}")
+
+    cur_path = "~/PycharmProjects/malicious-url-detection/"
+    logger.info(f"Working directory: {cur_path}")
+
+    dataset_train_path = cur_path + "./dataset/train_dataset.csv"
+    phishing_data = pd.read_csv(dataset_train_path, index_col=False, nrows=100000)
+    df = pd.DataFrame(phishing_data)
+    dataset_train = data_prepare.CustomTorchDataset(df)
+    dm_train = data_module.DatasetDataModuleTrain(dataset_train)
+    logger.info(f"Loaded dataset: {dataset_train_path}")
+
+    model = lightning_model.CustomModel()
+
+    trainer = pl.Trainer(limit_train_batches=1000, max_epochs=1, default_root_dir=cur_path+"./checkpoints/")
+    trainer.fit(model=model, train_dataloaders=dm_train.train_dataloader())
+
+
+if __name__ == "__main__":
+    train()
